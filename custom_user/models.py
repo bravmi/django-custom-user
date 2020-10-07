@@ -18,12 +18,6 @@ class UserManager(BaseUserManager):
         user.save()
         return user
 
-    def get_or(self, default=None, **kwargs):
-        try:
-            return self.get(**kwargs)
-        except User.DoesNotExist:
-            return default
-
 
 class User(AbstractBaseUser):
     username = models.CharField(max_length=150, unique=True, blank=True, null=True)

@@ -14,7 +14,13 @@ class EmailUsernameBackend(ModelBackend):
         if not username:
             return None
 
-        user = UserModel.objects.get_or(email=username) or UserModel.objects.get_or(username=username)
+        user = self.get_user_or(email=username) or self.get_user_or(username=username)
         if user and user.check_password(password) and self.user_can_authenticate(user):
             return user
         return None
+
+    def get_user_or(self, default=None, **fields):
+        try:
+            return UserModel.objects.get(**fields)
+        except UserModel.DoesNotExist:
+            return default
