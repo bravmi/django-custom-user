@@ -1,5 +1,6 @@
 import pytest
 from django.contrib.auth.hashers import is_password_usable
+from django.core.exceptions import ValidationError
 from django.db.utils import IntegrityError
 from django.test import TestCase
 
@@ -71,3 +72,8 @@ class EmailUsernameBackendTests(TestCase):
         password = 'foo'
         User.objects.create_user(email=email, username=username, password=password)
         assert self.client.login(username=username, password=password) is True
+
+    def test_invalid_username(self):
+        user = User.objects.create_user(email='user@gmail.com', username='@user', password='foo')
+        with pytest.raises(ValidationError, match=r'Enter a valid username'):
+            user.full_clean()

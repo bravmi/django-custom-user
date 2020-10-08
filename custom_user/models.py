@@ -1,6 +1,8 @@
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.db import models
 
+from .validators import UsernameValidator
+
 
 class UserManager(BaseUserManager):
     def create_user(self, email, username=None, password=None):
@@ -20,7 +22,8 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser):
-    username = models.CharField(max_length=150, unique=True, blank=True, null=True)
+    username_validator = UsernameValidator()
+    username = models.CharField(max_length=150, unique=True, blank=True, null=True, validators=[username_validator])
     email = models.EmailField(max_length=255, unique=True)
 
     is_active = models.BooleanField(default=True)

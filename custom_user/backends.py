@@ -10,11 +10,14 @@ class EmailUsernameBackend(ModelBackend):
     username/password pair
     """
 
-    def authenticate(self, request, username=None, password=None):
+    def authenticate(self, request, username=None, password=None, **kwargs):
         if not username:
             return None
 
-        user = self.get_user_or(email=username) or self.get_user_or(username=username)
+        if '@' in username:
+            user = self.get_user_or(email=username)
+        else:
+            user = self.get_user_or(username=username)
         if user and user.check_password(password) and self.user_can_authenticate(user):
             return user
         return None
