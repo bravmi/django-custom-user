@@ -60,6 +60,12 @@ class EmailUsernameBackendTests(TestCase):
         User.objects.create_user(email=email, password=password)
         assert self.client.login(username=email, password=password) is True
 
+    def test_login_with_email_uppercase(self):
+        email = 'user@gmail.com'
+        password = 'foo'
+        User.objects.create_user(email=email, password=password)
+        assert self.client.login(username=email.upper(), password=password) is True
+
     def test_login_with_empty_username(self):
         email = 'user@gmail.com'
         password = 'foo'

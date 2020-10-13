@@ -15,7 +15,7 @@ class EmailUsernameBackend(ModelBackend):
             return None
 
         if '@' in username:
-            user = self.get_user_or(email=username)
+            user = self.get_user_or(email__iexact=username)
         else:
             user = self.get_user_or(username=username)
         if user and user.check_password(password) and self.user_can_authenticate(user):
