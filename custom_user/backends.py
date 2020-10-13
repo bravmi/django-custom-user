@@ -24,6 +24,6 @@ class EmailUsernameBackend(ModelBackend):
 
     def get_user_or(self, default=None, **fields):
         try:
-            return UserModel.objects.get(**fields)
+            return UserModel._default_manager.get(**fields)
         except UserModel.DoesNotExist:
             return default
