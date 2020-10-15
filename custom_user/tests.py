@@ -52,6 +52,11 @@ class UsersManagersTests(TestCase):
         User.objects.create_user(email='user2@gmail.com', password='foo')
         assert User.objects.count() == 2
 
+    def test_emails_different_case(self):
+        User.objects.create_user(email='user@gmail.com', password='foo')
+        with pytest.raises(IntegrityError):
+            User.objects.create_user(email='USER@gmail.com', password='foo')
+
 
 class EmailUsernameBackendTests(TestCase):
     def test_login_with_email(self):
