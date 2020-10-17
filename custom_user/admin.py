@@ -73,38 +73,9 @@ class UserChangeForm(forms.ModelForm):
         return self.initial.get('password')
 
 
-class AdminPasswordChangeForm(forms.Form):
-    password1 = forms.CharField(label='Password', widget=forms.PasswordInput)
-    password2 = forms.CharField(label='Password confirmation', widget=forms.PasswordInput)
-
-    def __init__(self, user, *args, **kwargs):
-        self.user = user
-        super().__init__(*args, **kwargs)
-
-    def clean_password2(self):
-        password1 = self.cleaned_data.get('password1')
-        password2 = self.cleaned_data.get('password2')
-        if password1 and password2:
-            if password1 != password2:
-                raise ValidationError(
-                    self.error_messages['password_mismatch'], code='password_mismatch',
-                )
-        password_validation.validate_password(password2, self.user)
-        return password2
-
-    def save(self, commit=True):
-        """Save the new password."""
-        password = self.cleaned_data["password1"]
-        self.user.set_password(password)
-        if commit:
-            self.user.save()
-        return self.user
-
-
 class UserAdmin(BaseUserAdmin):
     form = UserChangeForm
     add_form = UserCreationForm
-    change_password_form = AdminPasswordChangeForm
 
     # The fields to be used in displaying the User model.
     # These override the definitions on the base UserAdmin
