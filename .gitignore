@@ -17,3 +17,5 @@ env/
 .mypy_cache/
 
 play.py
+
+.env
