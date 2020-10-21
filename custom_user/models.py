@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.db import models
+from django.core.exceptions import ValidationError
 
 from .validators import UsernameValidator
 
@@ -33,6 +34,16 @@ class User(AbstractBaseUser):
     REQUIRED_FIELDS = []
 
     objects = UserManager()
+
+    def validate_unique(self, *args, **kwargs):
+        super().validate_unique(*args, **kwargs)
+        if not self._state.adding:
+            return
+
+        if self.username and User.objects.filter(username__iexact=self.username).exists():
+            raise ValidationError('User with this Username already exists.')
+        if User.objects.filter(email__iexact=self.email).exists():
+            raise ValidationError('User with this Email already exists.')
 
     def has_perm(self, perm, obj=None):
         return True
