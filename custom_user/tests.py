@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from django.db.utils import IntegrityError
 from django.test import TestCase
 
-from .admin import UserCreationForm
+from .admin import UserChangeForm, UserCreationForm
 from .models import User
 
 
@@ -127,3 +127,22 @@ class AdminUserCreationFormTests(TestCase):
         data = {'email': 'user2@gmail.com', 'username': 'USER', 'password1': password, 'password2': password}
         form = UserCreationForm(data)
         assert form.has_error('__all__', code='username_already_taken')
+
+
+class AdminUserChangeFormTests(TestCase):
+    def test_change_email(self):
+        user = User.objects.create_user(email='user@gmail.com', username='user', password='This is a password')
+        data = {'email': 'user_new@gmail.com', 'username': user.username}
+        form = UserChangeForm(data=data, instance=user)
+        assert form.is_valid() is True
+        form.save()
+        assert user.email == data['email']
+
+    def test_change_username(self):
+        user = User.objects.create_user(email='user@gmail.com', username='user', password='This is a password')
+        data = {'email': user.email, 'username': 'user_new'}
+        form = UserChangeForm(data=data, instance=user)
+        assert form.is_valid() is True
+        form.save()
+        assert user.username == data['username']
+
