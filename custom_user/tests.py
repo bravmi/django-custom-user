@@ -3,6 +3,7 @@ from django.contrib.auth.hashers import is_password_usable
 from django.core.exceptions import ValidationError
 from django.db.utils import IntegrityError
 from django.test import TestCase
+from django.urls import reverse
 
 from .admin import UserChangeForm, UserCreationForm
 from .models import User
@@ -146,3 +147,32 @@ class AdminUserChangeFormTests(TestCase):
         form.save()
         assert user.username == data['username']
 
+
+class AdminAddUserViewTests(TestCase):
+    def test_add_user(self):
+        admin = User.objects.create_superuser(email='admin@gmail.com', password='foo')
+        self.client.force_login(admin)
+
+        password = 'This is a password'
+        data = {'email': 'user@gmail.com', 'username': 'user', 'password1': password, 'password2': password}
+        add_user_url = reverse('admin:custom_user_user_add')
+        response = self.client.post(add_user_url, data)
+
+        assert response.status_code == 302
+        new_user_pk = User.objects.last().pk
+        self.assertRedirects(response, reverse('admin:custom_user_user_change', args=[new_user_pk]))
+        assert User.objects.all().count() == 2
+
+    def test_add_user_password_too_short(self):
+        admin = User.objects.create_superuser(email='admin@gmail.com', password='foo')
+        self.client.force_login(admin)
+
+        password = 'foo'
+        data = {'email': 'user@gmail.com', 'username': 'user', 'password1': password, 'password2': password}
+        add_user_url = reverse('admin:custom_user_user_add')
+        response = self.client.post(add_user_url, data)
+
+        assert response.status_code == 200
+        self.assertFormError(
+            response, 'adminform', 'password2', ['This password is too short. It must contain at least 8 characters.']
+        )
