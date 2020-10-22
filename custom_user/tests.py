@@ -86,11 +86,8 @@ class EmailUsernameBackendTests(TestCase):
             user.full_clean()
 
 
-def assert_form_error(form, field, text=None):
-    assert len(form.errors) == 1
-    assert len(form.errors[field]) == 1
-    if text:
-        assert text in form.errors[field][0]
+def error_codes(form, field):
+    return [error.code for error in form.errors.as_data()[field]]
 
 
 class AdminUserCreationFormTests(TestCase):
@@ -98,35 +95,35 @@ class AdminUserCreationFormTests(TestCase):
         password = 'This is a password'
         data = {'email': 'user@gmail.com', 'username': '@user', 'password1': password, 'password2': password}
         form = UserCreationForm(data)
-        assert_form_error(form=form, field='username', text='Enter a valid username.')
+        assert form.has_error('username', code='invalid')
 
     def test_password_is_too_short(self):
         password = 'foo'
         data = {'email': 'user@gmail.com', 'password1': password, 'password2': password}
         form = UserCreationForm(data)
-        assert_form_error(form=form, field='password2', text='This password is too short.')
+        assert form.has_error('password2', code='password_too_short')
 
     def test_password_is_too_common(self):
         password = 'password'
         data = {'email': 'user@gmail.com', 'password1': password, 'password2': password}
         form = UserCreationForm(data)
-        assert_form_error(form=form, field='password2', text='This password is too common.')
+        assert form.has_error('password2', code='password_too_common')
 
     def test_passwords_do_not_match(self):
         data = {'email': 'user@gmail.com', 'password1': 'The one password', 'password2': 'The other password'}
         form = UserCreationForm(data)
-        assert_form_error(form=form, field='password2', text="Passwords don't match")
+        assert form.has_error('password2', code='passwords_do_not_match')
 
     def test_emails_different_case(self):
         password = 'This is a password'
         User.objects.create_user(email='user@gmail.com', password=password)
         data = {'email': 'USER@gmail.com', 'password1': password, 'password2': password}
         form = UserCreationForm(data)
-        assert_form_error(form=form, field='__all__', text='User with this Email already exists.')
+        assert form.has_error('__all__', code='email_already_taken')
 
     def test_usernames_different_case(self):
         password = 'This is a password'
         User.objects.create_user(email='user1@gmail.com', username='user', password=password)
         data = {'email': 'user2@gmail.com', 'username': 'USER', 'password1': password, 'password2': password}
         form = UserCreationForm(data)
-        assert_form_error(form=form, field='__all__', text='User with this Username already exists.')
+        assert form.has_error('__all__', code='username_already_taken')

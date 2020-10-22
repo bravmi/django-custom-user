@@ -41,9 +41,9 @@ class User(AbstractBaseUser):
             return
 
         if self.username and User.objects.filter(username__iexact=self.username).exists():
-            raise ValidationError('User with this Username already exists.')
+            raise ValidationError('User with this Username already exists.', code='username_already_taken')
         if User.objects.filter(email__iexact=self.email).exists():
-            raise ValidationError('User with this Email already exists.')
+            raise ValidationError('User with this Email already exists.', code='email_already_taken')
 
     def has_perm(self, perm, obj=None):
         return True
