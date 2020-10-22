@@ -176,3 +176,4 @@ class AdminAddUserViewTests(TestCase):
         self.assertFormError(
             response, 'adminform', 'password2', ['This password is too short. It must contain at least 8 characters.']
         )
+        self.assertContains(response, 'This password is too short.')
